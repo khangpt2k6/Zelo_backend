@@ -2,7 +2,7 @@
 
 A scalable, real-time chat application built with microservices architecture, featuring secure authentication, instant messaging, and email notifications.
 
-Visit the Frontend Repo here: https://github.com/khangpt2k6/Zelo
+**Visit the Frontend Repo here: https://github.com/khangpt2k6/Zelo**
 
 ## Architecture Overview
 
