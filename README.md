@@ -1,6 +1,7 @@
   #  Microservices Campus Social Chat App
 
 A scalable, real-time chat application built with microservices architecture, featuring secure authentication, instant messaging, and email notifications.
+**Visit the website: http://54.80.194.225:3000/**
 
 **Visit the Frontend Repo here: https://github.com/khangpt2k6/Zelo**
 
