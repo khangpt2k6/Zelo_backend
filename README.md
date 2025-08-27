@@ -1,4 +1,5 @@
   #  Microservices Campus Social Chat App
+<img width="1918" height="910" alt="image" src="https://github.com/user-attachments/assets/13e3e535-1903-4e7b-ad99-ed7e011c7518" />
 
 A scalable, real-time chat application built with microservices architecture, featuring secure authentication, instant messaging, and email notifications.
 **Visit the website: http://54.80.194.225:3000/**
