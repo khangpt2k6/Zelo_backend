@@ -1,0 +1,125 @@
+# Backend Services Docker Compose
+version: '3.8'
+
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:7.0
+    container_name: zelo-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-password}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE:-zelo}
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - zelo-network
+
+  # Redis Cache
+  redis:
+    image: redis:7.2-alpine
+    container_name: zelo-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - zelo-network
+
+  # RabbitMQ Message Broker
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    container_name: zelo-rabbitmq
+    restart: unless-stopped
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${Rabbitmq_Username:-admin}
+      RABBITMQ_DEFAULT_PASS: ${Rabbitmq_Password:-password}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - zelo-network
+
+  # User Service
+  user-service:
+    build:
+      context: ./user
+      dockerfile: Dockerfile
+    container_name: zelo-user-service
+    restart: unless-stopped
+    ports:
+      - "${USER_PORT:-5000}:${USER_PORT:-5000}"
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - PORT=${USER_PORT:-5000}
+      - MONGO_URI=${MONGO_URI}
+      - REDIS_URL=${REDIS_URL}
+      - Rabbitmq_Host=${Rabbitmq_Host}
+      - Rabbitmq_Username=${Rabbitmq_Username}
+      - Rabbitmq_Password=${Rabbitmq_Password}
+      - Cloud_Name=${Cloud_Name}
+      - Api_Key=${Api_Key}
+      - Api_Secret=${Api_Secret}
+      - JWT_SECRET=${JWT_SECRET}
+    depends_on:
+      - mongodb
+      - redis
+      - rabbitmq
+    networks:
+      - zelo-network
+
+  # Chat Service
+  chat-service:
+    build:
+      context: ./chat
+      dockerfile: Dockerfile
+    container_name: zelo-chat-service
+    restart: unless-stopped
+    ports:
+      - "${CHAT_PORT:-5002}:${CHAT_PORT:-5002}"
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - PORT=${CHAT_PORT:-5002}
+      - MONGO_URI=${MONGO_URI}
+    depends_on:
+      - mongodb
+    networks:
+      - zelo-network
+
+  # Mail Service
+  mail-service:
+    build:
+      context: ./mail
+      dockerfile: Dockerfile
+    container_name: zelo-mail-service
+    restart: unless-stopped
+    ports:
+      - "${MAIL_PORT:-5001}:${MAIL_PORT:-5001}"
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - PORT=${MAIL_PORT:-5001}
+      - USER=${USER}
+      - PASSWORD=${PASSWORD}
+      - Rabbitmq_Host=${Rabbitmq_Host}
+      - Rabbitmq_Username=${Rabbitmq_Username}
+      - Rabbitmq_Password=${Rabbitmq_Password}
+    depends_on:
+      - rabbitmq
+    networks:
+      - zelo-network
+
+volumes:
+  mongodb_data:
+  redis_data:
+  rabbitmq_data:
+
+networks:
+  zelo-network:
+    driver: bridge
